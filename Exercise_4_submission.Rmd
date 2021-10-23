@@ -1,0 +1,185 @@
+---
+title: "PS 811 Exercise 4"
+author: "Mingcong Pan"
+date: "10/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Base R tasks
+
+* Load the CSV file into your R environment.
+```{r}
+data <- read.csv("food_coded.csv")
+```
+
+* Extract the first 95 rows.
+```{r}
+subdata <- data [1:95,]
+```
+
+* Look at the following variables using both name and column index/number.
+  + GPA
+  + calories_chicken
+  + drink
+  + fav_cuisine
+  + father_profession
+  + mother_profession
+```{r eval=FALSE, results = FALSE, message=FALSE}
+data$GPA
+data$calories_chicken
+data$drink
+data$fav_cuisine
+data$father_profession
+data$mother_profession
+
+data[,1] #GPA
+data[,4] #calories_chicken
+data[,16] #drink
+data[,26] #fav_cuisine
+data[,25] #father_profession
+data[,45] #mother_profession
+```
+
+* Create a new variable for how healthy each person feels but convert the scale from 1 to 10 to 1 to 100.
+
+```{r}
+data$new_healthy_feeling <- data$healthy_feeling*10
+```
+
+* Filter to students who are female and have GPAs that are above 3.0.
+
+```{r}
+data.new <- data[data$GPA > 3, ]
+```
+
+* Find the mean and standard deviation for the following variables, and summarize them in a data frame.
+  + chicken_calories
+  + tortilla_calories
+  + turkey_calories
+  + waffle_calories
+  
+```{r}
+data$calories_chicken <- as.numeric(data$calories_chicken)
+data$tortilla_calories <- as.numeric(data$tortilla_calories)
+data$turkey_calories <- as.numeric(data$turkey_calories)
+data$waffle_calories <- as.numeric(data$waffle_calories)
+
+variable <- c('chicken_calories', 'tortilla_calories', 'turkey_calories', 'waffle_calories')
+mean <- c(mean(data$calories_chicken, na.rm = TRUE),mean(data$tortilla_calories, na.rm = TRUE),
+          mean(data$turkey_calories, na.rm = TRUE),mean(data$waffle_calories, na.rm = TRUE))
+sd <- c(sd(data$calories_chicken, na.rm = TRUE),sd(data$tortilla_calories, na.rm = TRUE),
+        sd(data$turkey_calories, na.rm = TRUE),sd(data$waffle_calories, na.rm = TRUE))
+df <- data.frame(variable, mean, sd)
+df
+```
+
+* Summarize GPA and weight within the gender and cuisine variables.
+
+```{r}
+data$GPA <- as.numeric(data$calories_chicken)
+data$weight <- as.numeric(data$tortilla_calories)
+
+mean(data$GPA[data$Gender==1 & data$cuisine==1], na.rm = TRUE)
+mean(data$GPA[data$Gender==1 & data$cuisine==2], na.rm = TRUE)
+mean(data$GPA[data$Gender==1 & data$cuisine==3], na.rm = TRUE)
+mean(data$GPA[data$Gender==1 & data$cuisine==4], na.rm = TRUE)
+mean(data$GPA[data$Gender==1 & data$cuisine==5], na.rm = TRUE)
+mean(data$GPA[data$Gender==1 & data$cuisine==6], na.rm = TRUE)
+mean(data$GPA[data$Gender==2 & data$cuisine==1], na.rm = TRUE)
+mean(data$GPA[data$Gender==2 & data$cuisine==2], na.rm = TRUE)
+mean(data$GPA[data$Gender==2 & data$cuisine==3], na.rm = TRUE)
+mean(data$GPA[data$Gender==2 & data$cuisine==4], na.rm = TRUE)
+mean(data$GPA[data$Gender==2 & data$cuisine==5], na.rm = TRUE)
+mean(data$GPA[data$Gender==2 & data$cuisine==6], na.rm = TRUE)
+
+mean(data$weight[data$Gender==1 & data$cuisine==1], na.rm = TRUE)
+mean(data$weight[data$Gender==1 & data$cuisine==2], na.rm = TRUE)
+mean(data$weight[data$Gender==1 & data$cuisine==3], na.rm = TRUE)
+mean(data$weight[data$Gender==1 & data$cuisine==4], na.rm = TRUE)
+mean(data$weight[data$Gender==1 & data$cuisine==5], na.rm = TRUE)
+mean(data$weight[data$Gender==1 & data$cuisine==6], na.rm = TRUE)
+mean(data$weight[data$Gender==2 & data$cuisine==1], na.rm = TRUE)
+mean(data$weight[data$Gender==2 & data$cuisine==2], na.rm = TRUE)
+mean(data$weight[data$Gender==2 & data$cuisine==3], na.rm = TRUE)
+mean(data$weight[data$Gender==2 & data$cuisine==4], na.rm = TRUE)
+mean(data$weight[data$Gender==2 & data$cuisine==5], na.rm = TRUE)
+mean(data$weight[data$Gender==2 & data$cuisine==6], na.rm = TRUE)
+```
+
+# Tidyverse tasks
+
+* Load the CSV file into your R environment.
+
+```{r}
+data2 <- read.csv("facebook-fact-check.csv")
+library(tidyverse)
+```
+
+* Extract the last 500 rows. (Mingcong's note: it seems the top_n() function extract top or bottom rows sorted by value. But here I using it as if it extract the original bottom 500 rows, instead of the sorted one)
+
+```{r}
+subdata2 <- data2 %>% top_n(-500)
+```
+
+* Look at the even-numbered column indices only. Identify them by name.
+
+```{r message=FALSE, warning=FALSE}
+names(data2)
+test <- data2 %>% select("post_id","Page","Date.Published","Rating","share_count","comment_count")
+```
+
+* Using mutate, create a new variable called post_type_coded that renames each post type to the following:
+  + link = 1
+  + photo = 2
+  + text = 3
+  + video = 4
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
+data2 %>% 
+  mutate(post_type_coded = case_when(
+    Post.Type == "link" ~ 1,
+    Post.Type == "photo" ~ 2,
+    Post.Type == "text" ~ 3,
+    Post.Type == "video" ~ 4)) 
+```
+
+* Arrange page names in reverse order.
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
+data2 %>% arrange(desc(Page))
+```
+
+* Find the mean and standard deviation for the following variables, and summarize them.
+  + share_count
+  + reaction_count
+  + comment_count
+  
+```{r results = FALSE, message=FALSE, warning=FALSE}
+data2 %>% 
+  summarize(mean_share_count = mean(share_count, na.rm = TRUE),   
+            mean_sreaction_count= mean(reaction_count, na.rm = TRUE),
+            mean_comment_count = mean(comment_count, na.rm = TRUE),          
+            sd_share_count = sd(share_count, na.rm = TRUE),
+            sd_reaction_count = sd(reaction_count, na.rm = TRUE),
+            sd_comment_count = sd(comment_count, na.rm = TRUE))
+
+```
+
+* Summarize the mean and standard deviations in Question 7 with the “mainstream” values in the category variable.
+
+```{r results = FALSE, message=FALSE, warning=FALSE}
+data2 %>% 
+  group_by(Category) %>% 
+  summarize(mean_share_count = mean(share_count, na.rm = TRUE),   
+            mean_sreaction_count= mean(reaction_count, na.rm = TRUE),
+            mean_comment_count = mean(comment_count, na.rm = TRUE),          
+            sd_share_count = sd(share_count, na.rm = TRUE),
+            sd_reaction_count = sd(reaction_count, na.rm = TRUE),
+            sd_comment_count = sd(comment_count, na.rm = TRUE))
+
+
+```
